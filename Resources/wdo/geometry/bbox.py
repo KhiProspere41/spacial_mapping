@@ -1,27 +1,40 @@
-def bbox_from_points(points):
-    """Return bbox as (min_lon, min_lat, max_lon, max_lat)."""
-    lats = [p[0] for p in points]
-    lons = [p[1] for p in points]
-    return (min(lons), min(lats), max(lons), max(lats))
+def _coords_from_geometry(geometry):
+    """
+    Flatten Polygon or MultiPolygon coordinates into a list of (lon, lat) pairs.
+    """
+    geom_type = geometry["type"]
+    coords = geometry["coordinates"]
+
+    points = []
+
+    if geom_type == "Polygon":
+        for ring in coords:
+            for lon, lat in ring:
+                points.append((lon, lat))
+
+    elif geom_type == "MultiPolygon":
+        for polygon in coords:
+            for ring in polygon:
+                for lon, lat in ring:
+                    points.append((lon, lat))
+
+    else:
+        raise ValueError(f"Unsupported geometry type: {geom_type}")
+
+    return points
 
 
 def bbox_from_feature(feature):
-    """Extract all coordinates from a feature and compute bbox."""
-    raise NotImplementedError
+    """
+    Return (min_lon, min_lat, max_lon, max_lat) for a GeoJSON Feature.
+    Supports Polygon and MultiPolygon.
+    """
+    points = _coords_from_geometry(feature["geometry"])
 
+    if not points:
+        raise ValueError("No coordinates found in feature.")
 
-def bbox_from_features(features):
-    """Compute bbox across multiple features."""
-    raise NotImplementedError
+    lons = [p[0] for p in points]
+    lats = [p[1] for p in points]
 
-
-def bbox_to_polygon(bbox):
-    """Convert bbox tuple into a closed polygon coordinate list."""
-    min_lon, min_lat, max_lon, max_lat = bbox
-    return [
-        (min_lat, min_lon),
-        (min_lat, max_lon),
-        (max_lat, max_lon),
-        (max_lat, min_lon),
-        (min_lat, min_lon),
-    ]
+    return min(lons), min(lats), max(lons), max(lats)
