@@ -709,10 +709,10 @@ completed_assignments/
     Goal: complete all 60 notebooks
 
   03-Data_Manager
-    21/21  [█████████████████████]
+    19/21  [█████████████████  ]
     Goal: complete all 21 notebooks
 
-  Total: 119/130 notebooks found
+  Total: 117/130 notebooks found
 
 
 ============================================================
